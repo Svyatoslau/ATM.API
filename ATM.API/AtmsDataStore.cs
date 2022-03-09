@@ -13,8 +13,8 @@ namespace ATM.API
             {
                 new AtmDto()
                 {
-                    Id = 0,
-                    Name = "Central ATM",
+                    Id = 1,
+                    Name = "ATM",
                     TotalMoney = 1000
                 }
             };
