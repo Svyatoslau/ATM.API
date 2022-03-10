@@ -26,7 +26,7 @@ namespace ATM.API.Controllers
             return Ok(atmToReturn);
         }
         [HttpPost("{id}")]
-        public ActionResult<AtmDto> WinthdrawMoney(int id,
+        public ActionResult<AtmDto> WithdrawMoney(int id,
             [FromBody] WithdrawMoneyOperationDto operation)
         {
             var atm = AtmsDataStore.Current.ATMs.FirstOrDefault(a => a.Id == id);
