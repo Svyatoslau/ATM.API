@@ -25,6 +25,7 @@ namespace ATM.API.Controllers
 
             return Ok(atmToReturn);
         }
-        [Http]
+        [HttpPost]
+        public ActionResult
     }
 }
