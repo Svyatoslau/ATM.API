@@ -36,14 +36,12 @@ namespace ATM.API.Controllers
                 return NotFound();
             }
 
-            var finalScore = atm.TotalMoney - operation.amount;
+            atm.TotalMoney = atm.TotalMoney - operation.amount;
 
-            if(finalScore < 0)
+            if (!TryValidateModel(atm))
             {
-                return BadRequest("No cash available at this moment.");
+                return BadRequest(ModelState);
             }
-
-            atm.TotalMoney = finalScore;
 
             return CreatedAtRoute("GetAtm", new
             {
