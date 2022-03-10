@@ -2,7 +2,7 @@
 
 namespace ATM.API.Models
 {
-    public class WithdrawMoneyOperation
+    public class WithdrawMoneyOperationDto
     {
         
         [Required]

@@ -26,24 +26,25 @@ namespace ATM.API.Controllers
             return Ok(atmToReturn);
         }
         [HttpPost("{id}")]
-        public ActionResult<AtmDto> WinthdrawMoney(int id,
-            [FromBody] WithdrawMoneyOperation operation)
+        public ActionResult<AtmDto> WithdrawMoney(int id,
+            [FromBody] WithdrawMoneyOperationDto operation)
         {
             var atm = AtmsDataStore.Current.ATMs.FirstOrDefault(a => a.Id == id);
-
             if (atm == null)
             {
                 return NotFound();
             }
 
-            var finalScore = atm.TotalMoney - operation.amount;
-
-            if(finalScore < 0)
+            var atmAfterWithdrawMoney = new AtmForWithdrawMoneyOperationDto
             {
-                return BadRequest("No cash available at this moment.");
+                TotalMoney = atm.TotalMoney - operation.amount
+            };
+            if (!TryValidateModel(atmAfterWithdrawMoney))
+            {
+                return BadRequest(ModelState);
             }
 
-            atm.TotalMoney = finalScore;
+            atm.TotalMoney = atmAfterWithdrawMoney.TotalMoney;
 
             return CreatedAtRoute("GetAtm", new
             {
