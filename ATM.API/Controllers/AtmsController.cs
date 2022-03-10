@@ -1,4 +1,4 @@
-﻿using ATM.API.Model;
+﻿using ATM.API.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

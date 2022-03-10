@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ATM.API.Model
+namespace ATM.API.Models
 {
     public class AtmDto
     {
