@@ -13,7 +13,7 @@ namespace ATM.API.Controllers
         {
             return Ok(AtmsDataStore.Current);
         }
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetAtm")]
         public ActionResult<AtmDto> GetAtm(int id)
         {
             var atmToReturn = AtmsDataStore.Current.ATMs.FirstOrDefault(atm => atm.Id == id);
@@ -25,7 +25,31 @@ namespace ATM.API.Controllers
 
             return Ok(atmToReturn);
         }
-        [HttpPost]
-        public ActionResult
+        [HttpPost("{id}")]
+        public ActionResult<AtmDto> WinthdrawMoney(int id,
+            [FromBody] WithdrawMoneyOperation operation)
+        {
+            var atm = AtmsDataStore.Current.ATMs.FirstOrDefault(a => a.Id == id);
+
+            if (atm == null)
+            {
+                return NotFound();
+            }
+
+            var finalScore = atm.TotalMoney - operation.amount;
+
+            if(finalScore < 0)
+            {
+                return BadRequest("No cash available at this moment.");
+            }
+
+            atm.TotalMoney = finalScore;
+
+            return CreatedAtRoute("GetAtm", new
+            {
+                id = atm.Id
+            },
+            atm);
+        }
     }
 }

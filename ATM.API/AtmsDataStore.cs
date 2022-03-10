@@ -15,7 +15,7 @@ namespace ATM.API
                 {
                     Id = 1,
                     Name = "ATM",
-                    TotalMoney = 1000
+                    TotalMoney = 1000                    
                 }
             };
         }
