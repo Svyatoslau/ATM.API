@@ -27,21 +27,24 @@ namespace ATM.API.Controllers
         }
         [HttpPost("{id}")]
         public ActionResult<AtmDto> WinthdrawMoney(int id,
-            [FromBody] WithdrawMoneyOperation operation)
+            [FromBody] WithdrawMoneyOperationDto operation)
         {
             var atm = AtmsDataStore.Current.ATMs.FirstOrDefault(a => a.Id == id);
-
             if (atm == null)
             {
                 return NotFound();
             }
 
-            atm.TotalMoney = atm.TotalMoney - operation.amount;
-
-            if (!TryValidateModel(atm))
+            var atmAfterWithdrawMoney = new AtmForWithdrawMoneyOperationDto
+            {
+                TotalMoney = atm.TotalMoney - operation.amount
+            };
+            if (!TryValidateModel(atmAfterWithdrawMoney))
             {
                 return BadRequest(ModelState);
             }
+
+            atm.TotalMoney = atmAfterWithdrawMoney.TotalMoney;
 
             return CreatedAtRoute("GetAtm", new
             {
