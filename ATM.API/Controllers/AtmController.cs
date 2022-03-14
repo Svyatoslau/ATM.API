@@ -11,9 +11,9 @@ public class AtmController : ControllerBase
 {
     private readonly Atm _atm;
     private readonly Bank _bank;
-    private readonly CardServise _cardService;
+    private readonly CardService _cardService;
 
-    public AtmController(Atm atm, Bank bank, CardServise cardService)
+    public AtmController(Atm atm, Bank bank, CardService cardService)
         => (_atm, _bank, _cardService) = (atm, bank, cardService);
 
     [HttpGet(Name = "GetAtmAmount")]
@@ -27,9 +27,14 @@ public class AtmController : ControllerBase
     {
         try
         {
-            var card = _cardService.MakeCard(model.inputCard);
+            var isValidCard = _cardService.IsValidCardNumber(model.CardNumber);
 
-            _bank.CardCheck(card);
+            if (!isValidCard)
+            {
+                return BadRequest();
+            }
+
+            var card = _bank.GetCard(model.CardNumber);
 
             _atm.Withdraw(model.Amount, card.Brand);
 

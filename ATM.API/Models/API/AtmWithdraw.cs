@@ -1,6 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace ATM.API.Models.API;
 
-namespace ATM.API.Models.API;
-
-public sealed record AtmWithdraw
-    (int Amount, CardForWithdraw inputCard);
+public sealed record AtmWithdraw(
+    int Amount, 
+    string CardNumber);

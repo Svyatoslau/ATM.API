@@ -4,7 +4,7 @@ namespace ATM.API.Models;
 
 public sealed record Card(
     string Number,
-    string Initials,
+    string Holder,
     CardBrand Brand,
-    int Code);
+    int Balance);
 

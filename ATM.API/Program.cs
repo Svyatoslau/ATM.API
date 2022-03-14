@@ -8,7 +8,7 @@ builder
     .Services
     .AddSingleton<Atm>()
     .AddSingleton<Bank>()
-    .AddSingleton<CardServise>();
+    .AddSingleton<CardService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

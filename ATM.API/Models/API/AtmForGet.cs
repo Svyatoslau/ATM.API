@@ -1,4 +1,4 @@
 ﻿namespace ATM.API.Models.API;
 
-public  record AtmForGet(int TotalAmount);
+public sealed record AtmForGet(int TotalAmount);
 
