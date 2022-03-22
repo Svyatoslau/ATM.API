@@ -42,7 +42,8 @@ public sealed class Atm
                 ($"You couldn't withdraw {amount}. Available amount is {remainingBalance}. Sorry {card.Holder}.");
         }
 
-        card.Balance = cardBalance;
+        //card.Balance = cardBalance;
+        card.Withdraw(amount);
         TotalAmount = atmBalance;
     }
 }

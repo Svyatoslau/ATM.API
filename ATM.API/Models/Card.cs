@@ -4,13 +4,15 @@ namespace ATM.API.Models;
 
 public sealed class Card
 {
-    public string Number { get; init; }
-    public string Holder { get; init; }
-    public CardBrand Brand { get; init; }
-    public int Balance { get; set; }
+    public string Number { get; }
+    public string Holder { get; }
+    public CardBrand Brand { get; }
+    public int Balance { get; private set; }
 
     public Card(string number, string holder, CardBrand brand, int balance) =>
         (Number, Holder, Brand, Balance) = (number, holder, brand, balance);
+
+    public void Withdraw(int amount) => Balance -= amount;
 }
 
     

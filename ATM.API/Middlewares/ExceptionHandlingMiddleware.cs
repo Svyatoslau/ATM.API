@@ -1,14 +1,8 @@
-﻿using System.Net.Mime;
-using static Microsoft.AspNetCore.Http.StatusCodes;
+﻿namespace ATM.API.Middlewares;
 
-namespace ATM.API.Middlewares;
-
-public class ExceptionHandlingMiddleware
+public class ExceptionHandlingMiddleware : ExceptionMiddlewareBase
 {
     private readonly RequestDelegate _next;
-
-
-
     public ExceptionHandlingMiddleware(RequestDelegate next) => _next = next;
 
     public async Task Invoke(HttpContext context)
@@ -19,31 +13,19 @@ public class ExceptionHandlingMiddleware
         }
         catch (ArgumentOutOfRangeException ex)
         {
-            await WriteResponceAsJsonAsync(context, Status400BadRequest, ex.Message);
+            await context.Response
+                .WriteJson(BadRequest(new ExceptionResult(ex.Message)));
         }
         catch (InvalidOperationException ex)
         {
-            await WriteResponceAsJsonAsync(context, Status422UnprocessableEntity, ex.Message);
+            await context.Response
+                .WriteJson(UnprocessableEntity(new ExceptionResult(ex.Message)));
         }
         catch (KeyNotFoundException ex)
         {
-            await WriteResponceAsJsonAsync(context, Status404NotFound, ex.Message);
+            await context.Response
+                .WriteJson(InternalServerError(new ExceptionResult(ex.Message)));
         }
-    }
-
-    private async Task WriteResponceAsJsonAsync(
-    HttpContext context, int statusCode, string message)
-    {
-        context.Response.StatusCode = statusCode;
-        context.Response.ContentType = MediaTypeNames.Application.Json;
-
-        await context.Response.WriteAsJsonAsync(new
-        {
-            ActionId = Guid.NewGuid(),
-            Title = "Exception",
-            StatusCode = statusCode,
-            Message = message
-        });
     }
 }
 
