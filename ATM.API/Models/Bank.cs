@@ -9,14 +9,4 @@ public sealed class Bank
     };
 
     public Card GetCard(string cardNumber) => Cards.Single(x => x.Number.Equals(cardNumber));
-    
-    public void CardCheck(Card card)
-    {
-        var _card = Cards.FirstOrDefault(c => c == card);
-
-        if(_card == null)
-        {
-            throw new KeyNotFoundException("Card didn't found.");
-        }
-    }
 }

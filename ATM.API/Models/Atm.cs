@@ -6,9 +6,9 @@ public sealed class Atm
     public int GetTotalAmount() { return TotalAmount; }
     private int WithdrawLimit { get; set; } = 200;
 
-    public void Withdraw(int amount, CardBrand brand)
+    public void Withdraw(int amount, Card card)
     {
-        WithdrawLimit = (int)brand;
+        WithdrawLimit = (int)card.Brand;
         if (amount < 0)
         {
             throw new ArgumentOutOfRangeException("You couldn't withdraw less or equal to zero.");
@@ -22,18 +22,27 @@ public sealed class Atm
 
         if (TotalAmount < 0)
         {
-            throw new ApplicationException
-                ("No cash available at the moment.");
+            throw new InvalidOperationException
+                ($"No cash available at the moment in the bank. Sorry {card.Holder}.");
         }
 
+        if (card.Balance < 0)
+        {
+            throw new InvalidOperationException
+                ($"No cash available at the moment on the card. Sorry {card.Holder}.");
+        }
+
+        var cardBalance = card.Balance - amount;
         var atmBalance = TotalAmount - amount;
 
-        if(atmBalance < 0)
+        if(atmBalance < 0 || cardBalance < 0)
         {
-            throw new ApplicationException
-                ($"You couldn't withdraw {amount}. Available amount is {TotalAmount}");
+            var remainingBalance = cardBalance < atmBalance ? card.Balance : TotalAmount;
+            throw new InvalidOperationException
+                ($"You couldn't withdraw {amount}. Available amount is {remainingBalance}. Sorry {card.Holder}.");
         }
 
+        card.Balance = cardBalance;
         TotalAmount = atmBalance;
     }
 }

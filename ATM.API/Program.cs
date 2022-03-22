@@ -1,3 +1,4 @@
+using ATM.API.Middlewares;
 using ATM.API.Models;
 using ATM.API.Services;
 
@@ -8,7 +9,7 @@ builder
     .Services
     .AddSingleton<Atm>()
     .AddSingleton<Bank>()
-    .AddSingleton<CardService>();
+    .AddSingleton<ICardService, CardService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -25,6 +26,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseRouting();
 
