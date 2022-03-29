@@ -25,6 +25,17 @@ public class AtmController : ControllerBase
     [HttpPost("withdraw")]
     public ActionResult Withdraw([FromBody] AtmWithdraw model)
     {
+        //Usually controller stands for receiving request data
+        //and mediates data to service.
+        //So it's better to move this logic to ATM class.
+        //
+        //You should only define here Withdraw logic
+        //to use ATM class like so:
+        //
+        //_atm.Withdraw(model.Amount, model.CardNumber);
+        //
+        //return Ok(new { Message = "You successfully withdrawn money from your card" });
+        
         var isValidCard = _cardService.IsValidCardNumber(model.CardNumber);
 
         if (!isValidCard)

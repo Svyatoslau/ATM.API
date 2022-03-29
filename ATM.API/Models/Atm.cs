@@ -10,6 +10,14 @@ public sealed class Atm
 
     public Atm(Bank bank)
     {
+        //You can use the new way of throwing Exceptions:
+        //
+        //ArgumentNullException.ThrowIfNull(bank, nameof(bank));
+        //
+        //Or the new constructor syntax:
+        //
+        //public Atm(Bank bank) => _bank = bank ?? throw new ArgumentNullException(nameof(bank));
+        
         _bank = bank ?? throw new ArgumentNullException(nameof(bank));
     }
 
@@ -18,6 +26,11 @@ public sealed class Atm
     {
         if (amount < 0)
         {
+            //ArgumentOutOfRangeException has a different first parameter then massage
+            //
+            //You should use it like so:
+            //throw new ArgumentOutOfRangeException(nameof(amount), "...");
+            
             throw new ArgumentOutOfRangeException("You couldn't withdraw less or equal to zero.");
         }
 
@@ -28,7 +41,7 @@ public sealed class Atm
         }
 
 
-        if(TotalAmount< amount)
+        if (TotalAmount< amount)
         {
             throw new InvalidOperationException
                 ($"You couldn't withdraw {amount}. Available ATM amount is {TotalAmount}. Sorry.");

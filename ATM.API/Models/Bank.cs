@@ -14,13 +14,22 @@ public sealed class Bank
     {
         var card = GetCard(cardNumber);
 
+        //How can you withdraw money if Card balance equals to 0?
         if (card.Balance < 0)
         {
             throw new InvalidOperationException
                 ($"No cash available at the moment on the card. Sorry {card.Holder}.");
         }
 
+        //Card limits usually belongs to Bank.
+        //It's better to define CardTypeLimits property in Bank class
+        //Then define method to get such limits based on CardType like so:
+        //
+        //private static int GetCardWithdrawLimit(CardType cardType) { };
+
+        //Also, variables inside of the method should be camelCase
         var IsLimitExceeded = amount > (int)card.Brand;
+        
         if (IsLimitExceeded)
         {
             throw new ArgumentOutOfRangeException
