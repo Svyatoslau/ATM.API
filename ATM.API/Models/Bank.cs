@@ -12,12 +12,29 @@ public sealed class Bank
 
     public void Withdraw(string cardNumber, int amount)
     {
-        //
-        // 1. Check card balance
-        // 2. Check card withdraw limit
-        // 3. Withdraw money from card
-        // 4. Track succeeded transaction
-        // 5. If withdraw fails, track failed transaction
-        //
+        var card = GetCard(cardNumber);
+
+        if (card.Balance < 0)
+        {
+            throw new InvalidOperationException
+                ($"No cash available at the moment on the card. Sorry {card.Holder}.");
+        }
+
+        var IsLimitExceeded = amount > (int)card.Brand;
+        if (IsLimitExceeded)
+        {
+            throw new ArgumentOutOfRangeException
+                ($"You couldn't withdraw more than {(int)card.Brand} at once.");
+        }
+
+        if (card.Balance < amount)
+        {
+            throw new InvalidOperationException
+                ($"You couldn't withdraw {amount}. Available card amount is {card.Balance}. Sorry {card.Holder}.");
+        }
+
+        card.Withdraw(amount);
     }
+
+    
 }

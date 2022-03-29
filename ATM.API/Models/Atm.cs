@@ -2,49 +2,41 @@
 
 public sealed class Atm
 {
+    private readonly Bank _bank;
+
     private int TotalAmount { get; set; } = 1000;
     public int GetTotalAmount() { return TotalAmount; }
-    private int WithdrawLimit { get; set; } = 200;
+    //private int WithdrawLimit { get; set; } = 200;
 
-    public void Withdraw(int amount, Card card)
+    public Atm(Bank bank)
     {
-        WithdrawLimit = (int)card.Brand;
+        _bank = bank ?? throw new ArgumentNullException(nameof(bank));
+    }
+
+
+    public void Withdraw(int amount, string cardNumber)
+    {
         if (amount < 0)
         {
             throw new ArgumentOutOfRangeException("You couldn't withdraw less or equal to zero.");
         }
 
-        if (amount > WithdrawLimit)
-        {
-            throw new ArgumentOutOfRangeException
-                ($"You couldn't withdraw more than {WithdrawLimit} at once.");
-        }
-
         if (TotalAmount < 0)
         {
             throw new InvalidOperationException
-                ($"No cash available at the moment in the bank. Sorry {card.Holder}.");
+                ($"No cash available at the moment in the bank. Sorry.");
         }
 
-        if (card.Balance < 0)
+
+        if(TotalAmount< amount)
         {
             throw new InvalidOperationException
-                ($"No cash available at the moment on the card. Sorry {card.Holder}.");
+                ($"You couldn't withdraw {amount}. Available ATM amount is {TotalAmount}. Sorry.");
         }
 
-        var cardBalance = card.Balance - amount;
-        var atmBalance = TotalAmount - amount;
-
-        if(atmBalance < 0 || cardBalance < 0)
-        {
-            var remainingBalance = cardBalance < atmBalance ? card.Balance : TotalAmount;
-            throw new InvalidOperationException
-                ($"You couldn't withdraw {amount}. Available amount is {remainingBalance}. Sorry {card.Holder}.");
-        }
-
-        //card.Balance = cardBalance;
-        card.Withdraw(amount);
-        TotalAmount = atmBalance;
+        _bank.Withdraw(cardNumber, amount);
+        
+        TotalAmount -= amount;
     }
 }
 

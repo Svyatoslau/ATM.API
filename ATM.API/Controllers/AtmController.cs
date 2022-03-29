@@ -34,7 +34,7 @@ public class AtmController : ControllerBase
 
         var card = _bank.GetCard(model.CardNumber);
 
-        _atm.Withdraw(model.Amount, card);
+        _atm.Withdraw(model.Amount, card.Number);
 
         return Ok(new AtmSuccessfulWithdrawOutput(card.Holder, card.Balance));
     }

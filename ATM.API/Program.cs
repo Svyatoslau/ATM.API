@@ -7,8 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder
     .Services
-    .AddSingleton<Atm>()
     .AddSingleton<Bank>()
+    .AddSingleton<Atm>()
     .AddSingleton<ICardService, CardService>();
 
 builder.Services.AddControllers();
