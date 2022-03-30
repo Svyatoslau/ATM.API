@@ -34,7 +34,7 @@ public sealed class Bank : IBankService
     {
         if (!IsValidCardNumber(cardNumber))
         {
-            throw new ArgumentOutOfRangeException(nameof(amount), "Invalid card number.");
+            throw new ArgumentOutOfRangeException(nameof(cardNumber), "Invalid card number.");
         }
 
         var card = GetCard(cardNumber);
