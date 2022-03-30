@@ -1,6 +1,9 @@
-﻿namespace ATM.API.Models;
+﻿using ATM.API.Services;
+using System.Text.RegularExpressions;
 
-public sealed class Bank
+namespace ATM.API.Models;
+
+public sealed class Bank : IBankService
 {
     private static readonly ICollection<Card> Cards = new HashSet<Card>
     {
@@ -8,32 +11,48 @@ public sealed class Bank
         new ("5200000000001005", "Levi Downs", CardBrand.MasterCard, 400)
     };
 
+    public int CardTypeLimits { get; private set; }
+
+
     public Card GetCard(string cardNumber) => Cards.Single(x => x.Number.Equals(cardNumber));
 
+    private static int GetCardWithdrawLimit(CardBrand cardBrand)
+    {
+        switch (cardBrand)
+        {
+            case CardBrand.MasterCard: 
+                return (int)CardBrand.MasterCard;
+            case CardBrand.Visa:
+                return (int)CardBrand.Visa;
+            default: 
+                throw new ArgumentOutOfRangeException(nameof(cardBrand), $"Invalid card type.");
+        }
+	
+    }
+    
     public void Withdraw(string cardNumber, int amount)
     {
-        var card = GetCard(cardNumber);
-
-        //How can you withdraw money if Card balance equals to 0?
-        if (card.Balance < 0)
+        if (!IsValidCardNumber(cardNumber))
         {
-            throw new InvalidOperationException
-                ($"No cash available at the moment on the card. Sorry {card.Holder}.");
+            throw new ArgumentOutOfRangeException(nameof(amount), "Invalid card number.");
         }
 
-        //Card limits usually belongs to Bank.
-        //It's better to define CardTypeLimits property in Bank class
-        //Then define method to get such limits based on CardType like so:
-        //
-        //private static int GetCardWithdrawLimit(CardType cardType) { };
+        var card = GetCard(cardNumber);
 
-        //Also, variables inside of the method should be camelCase
-        var IsLimitExceeded = amount > (int)card.Brand;
+        if (card.Balance <= 0)
+        {
+            throw new InvalidOperationException
+                ($"No cash available at the moment on the card." +
+                $" Available amount is {card.Balance}. Sorry {card.Holder}.");
+        }
+
+        CardTypeLimits = GetCardWithdrawLimit(card.Brand);
+
         
-        if (IsLimitExceeded)
+        if (CardTypeLimits < amount)
         {
             throw new ArgumentOutOfRangeException
-                ($"You couldn't withdraw more than {(int)card.Brand} at once.");
+                (nameof(amount), $"You couldn't withdraw more than {(int)card.Brand} at once.");
         }
 
         if (card.Balance < amount)
@@ -45,5 +64,5 @@ public sealed class Bank
         card.Withdraw(amount);
     }
 
-    
+    private bool IsValidCardNumber(string cardNumber) => Regex.IsMatch(cardNumber, @"\d{16}");
 }

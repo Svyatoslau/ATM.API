@@ -1,8 +1,8 @@
-﻿using ATM.API.Models;
+﻿using ATM.API.Services;
 
 namespace ATM.API.Models;
 
-public sealed class Card
+public sealed class Card 
 {
     public string Number { get; }
     public string Holder { get; }
