@@ -1,13 +1,16 @@
-﻿namespace ATM.API.Services;
+﻿using ATM.API.Models;
 
-public interface IAtmService
+namespace ATM.API.Services;
+
+public interface IAtmService : ISessional
 {
-    public void Withdraw(int amount);
-    public void SaveCard(string cardNumber);
-    public void ValidCard(string cardNumber, string password);
-    public void VerifyPassword(string password);
-    public void CardExist(string cardNumber);
-    public Guid CreateToken();
-    public void ValidToken(string token);
-    public void CleanToken();
+    bool Authorize(Guid token, string cardPassword);
+    void Withdraw(Guid token, int amount);
+    void SaveCard(string cardNumber);
+    void ValidCard(string cardNumber, string password);
+    void VerifyPassword(string password);
+    void CardExist(string cardNumber);
+    Guid CreateToken();
+    void ValidToken(string token);
+    void CleanToken();
 }

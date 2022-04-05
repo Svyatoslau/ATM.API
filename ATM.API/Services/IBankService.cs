@@ -1,7 +1,10 @@
-﻿namespace ATM.API.Services;
+﻿using ATM.API.Models;
+
+namespace ATM.API.Services;
 
 public interface IBankService
 {
-    public void Withdraw(string cardNumber, int amount);
-    public void VerifyCardPassword(string cardNumber, string password);
+    Card GetCard(string cardNumber);
+    void Withdraw(string cardNumber, int amount);
+    void VerifyCardPassword(string cardNumber, string password);
 }

@@ -2,11 +2,20 @@
 
 namespace ATM.API.Models;
 
+public interface ISessional
+{
+    Guid StartSession(string cardNumber);
+    void FinishSession(Guid token);
+}
+
 public sealed class Atm : IAtmService
 {
     private readonly IBankService _bankService;
     private readonly ICardService _cardService;
     private readonly ISecurityManager _securityManager;
+
+    private readonly CardSessionManager _cardSessionManager;
+    
     private int TotalAmount { get; set; } = 1000;
     public int GetTotalAmount() { return TotalAmount; }
 
@@ -15,8 +24,13 @@ public sealed class Atm : IAtmService
     public Atm(IBankService bankService, ICardService cardService, ISecurityManager securityManager)
         => (_bankService, _cardService, _securityManager) = (bankService, cardService, securityManager);
 
-    public void Withdraw(int amount)
+    public void Withdraw(Guid token, int amount)
     {
+        if (!_cardSessionManager.IsSessionAuthorized(token))
+        {
+            throw new UnauthorizedAccessException();
+        }
+        
         if (amount <= 0)
         {
             throw new ArgumentOutOfRangeException
@@ -36,11 +50,13 @@ public sealed class Atm : IAtmService
                 ($"You couldn't withdraw {amount}. Available ATM amount is {TotalAmount}. Sorry.");
         }
 
-        _bankService.Withdraw(CardNumber, amount);
+        var cardNumber = _cardSessionManager.GetCardNumber(token);
+
+        _bankService.Withdraw(cardNumber, amount);
 
         TotalAmount -= amount;
 
-        CleanToken();
+        _cardSessionManager.FinishSession(token);
     }
 
     public void SaveCard(string cardNumber)
@@ -94,5 +110,39 @@ public sealed class Atm : IAtmService
 
     public void CleanToken() => Token = Guid.Empty;
     
+    // New Methods
+    public Guid StartSession(string cardNumber)
+    {
+        if (!_cardService.IsValidCardNumber(cardNumber))
+        {
+            throw new ArgumentException("Invalid card number.", nameof(cardNumber));
+        }
+        
+        return _cardSessionManager.StartSession(cardNumber);
+    }
+    
+    public bool Authorize(Guid token, string cardPassword)
+    {
+        if (!_cardSessionManager.IsSessionValid(token))
+        {
+            return false;
+        }
+        
+        var cardNumber = _cardSessionManager.GetCardNumber(token);
+
+        var card = _bankService.GetCard(cardNumber);
+
+        if (!card.VerifyPassword(cardPassword))
+        {
+            return false;
+        }
+        
+        _cardSessionManager.AuthorizeSession(token);
+
+        return true;
+    }
+    
+    public void FinishSession(Guid token) => _cardSessionManager.FinishSession(token);
+    //
 }
 

@@ -2,5 +2,5 @@
 
 public interface ICardService
 {
-    public bool IsValidCardNumber(string cardNumber);
+    bool IsValidCardNumber(string cardNumber);
 }
