@@ -26,6 +26,11 @@ public class ExceptionHandlingMiddleware : ExceptionMiddlewareBase
             await context.Response
                 .WriteJson(InternalServerError(new ExceptionResult(ex.Message)));
         }
+        catch (ArgumentException ex)
+        {
+            await context.Response
+                .WriteJson(BadRequest(new ExceptionResult(ex.Message)));
+        }
     }
 }
 

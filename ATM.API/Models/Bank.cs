@@ -10,31 +10,24 @@ public sealed class Bank : IBankService
         new ("4444333322221111", "Troy Mcfarland", CardBrand.Visa, 800, "edyDfd5A"),
         new ("5200000000001005", "Levi Downs", CardBrand.MasterCard, 400, "teEAxnqg")
     };
-    
-    //This property belongs to Bank and shouldn't be exposed to clients.
-    public int CardTypeLimits { get; private set; }
+
+    private readonly ICardService _cardService;
+    private int cardWithdrawLimit { get; set; }
+
+    public Bank(ICardService cardService) => _cardService = cardService;
 
     public Card GetCard(string cardNumber) => Cards.Single(x => x.Number.Equals(cardNumber));
 
-    private static int GetCardWithdrawLimit(CardBrand cardBrand)
+    private static int GetCardWithdrawLimit(CardBrand cardBrand) => cardBrand switch
     {
-        //Use a new switch expression syntax here.
-        //
-        //Don't set business rules in Enum
-        switch (cardBrand)
-        {
-            case CardBrand.MasterCard: 
-                return (int)CardBrand.MasterCard;
-            case CardBrand.Visa:
-                return (int)CardBrand.Visa;
-            default: 
-                throw new ArgumentOutOfRangeException(nameof(cardBrand), $"Invalid card type.");
-        }
-    }
-    
+        CardBrand.MasterCard => 300,
+        CardBrand.Visa => 200,
+        _ => throw new ArgumentOutOfRangeException(nameof(cardBrand), $"Invalid card type."),
+    };
+
     public void Withdraw(string cardNumber, int amount)
     {
-        if (!IsValidCardNumber(cardNumber))
+        if (!_cardService.IsValidCardNumber(cardNumber))
         {
             throw new ArgumentOutOfRangeException(nameof(cardNumber), "Invalid card number.");
         }
@@ -48,11 +41,10 @@ public sealed class Bank : IBankService
                 $" Available amount is {card.Balance}. Sorry {card.Holder}.");
         }
 
-        //cardWithdrawLimit
-        CardTypeLimits = GetCardWithdrawLimit(card.Brand);
+        cardWithdrawLimit = GetCardWithdrawLimit(card.Brand);
 
-        
-        if (CardTypeLimits < amount)
+
+        if (cardWithdrawLimit < amount)
         {
             throw new ArgumentOutOfRangeException
                 (nameof(amount), $"You couldn't withdraw more than {(int)card.Brand} at once.");
@@ -67,5 +59,13 @@ public sealed class Bank : IBankService
         card.Withdraw(amount);
     }
 
-    private bool IsValidCardNumber(string cardNumber) => Regex.IsMatch(cardNumber, @"\d{16}");
+    public void VerifyCardPassword(string cardNumber, string password)
+    {
+        var card = GetCard(cardNumber);
+
+        if (!card.VerifyPassword(password))
+        {
+            throw new ArgumentException("Not valid passowrd");
+        }
+    }
 }

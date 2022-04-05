@@ -8,12 +8,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder
     .Services
     .AddSingleton<IBankService, Bank>()
-    .AddSingleton<IAtmService, Atm>();
+    .AddSingleton<IAtmService, Atm>()
+    .AddSingleton<ICardService, CardService>()
+    .AddSingleton<ISecurityManager, SecurityManager>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddApiVersioning(setupAction =>
+{
+    setupAction.AssumeDefaultVersionWhenUnspecified = true;
+    setupAction.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1,0);
+    setupAction.ReportApiVersions = true;
+});
 
 var app = builder.Build();
 

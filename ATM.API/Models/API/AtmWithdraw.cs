@@ -1,5 +1,3 @@
 ﻿namespace ATM.API.Models.API;
 
-public sealed record AtmWithdraw(
-    int Amount, 
-    string CardNumber);
+public sealed record AtmWithdraw(int Amount);
