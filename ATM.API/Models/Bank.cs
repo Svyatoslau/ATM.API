@@ -13,7 +13,6 @@ public sealed class Bank : IBankService
 
     public int CardTypeLimits { get; private set; }
 
-
     public Card GetCard(string cardNumber) => Cards.Single(x => x.Number.Equals(cardNumber));
 
     private static int GetCardWithdrawLimit(CardBrand cardBrand)
@@ -27,7 +26,6 @@ public sealed class Bank : IBankService
             default: 
                 throw new ArgumentOutOfRangeException(nameof(cardBrand), $"Invalid card type.");
         }
-	
     }
     
     public void Withdraw(string cardNumber, int amount)
