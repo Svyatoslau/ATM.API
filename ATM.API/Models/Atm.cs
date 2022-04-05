@@ -26,7 +26,7 @@ public sealed class Atm: IAtmService
         }
 
 
-        if (TotalAmount< amount)
+        if (TotalAmount < amount)
         {
             throw new InvalidOperationException
                 ($"You couldn't withdraw {amount}. Available ATM amount is {TotalAmount}. Sorry.");
