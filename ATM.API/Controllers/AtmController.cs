@@ -1,5 +1,7 @@
 ﻿using ATM.API.Models.API;
-using ATM.API.Services;
+using ATM.API.Models.Interfaces;
+using ATM.API.Models.Managers.Interfaces;
+using ATM.API.Models.Managers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,17 +12,16 @@ namespace ATM.API.Controllers;
 
 public class AtmController : ControllerBase
 {
-    private readonly IAtmService _atmService;
+    private readonly IAtm _atmService;
+    private readonly CardSessionManager _cardSessionManager;
 
-    public AtmController(IAtmService atmService) => _atmService = atmService;
+    public AtmController(IAtm atmService, CardSessionManager cardSessionManager) 
+        => (_atmService, _cardSessionManager) = (atmService,cardSessionManager);
 
     [HttpGet("cards/{cardNumber}")]
     public ActionResult Init(string cardNumber)
     {
-        // - store card in ATM
-        //_atmService.SaveCard(cardNumber);
-
-        var token = _atmService.StartSession(cardNumber);
+        var token = _cardSessionManager.StartSession(cardNumber);
 
         return Ok(new
         {
@@ -32,29 +33,14 @@ public class AtmController : ControllerBase
     [HttpPost("cards/{cardNumber}")]
     public ActionResult Authorize(string cardNumber, [FromBody] AtmForAuthorize model, [FromHeader(Name = "X-Token")] Guid token)
     {
-        // - find stored card in ATM
-        // - verify card password
-        //_atmService.ValidCard(cardNumber, model.password);
+        _cardSessionManager.AuthorizeSession(token, model.password);
 
-        // - create and store token in ATM for further actions
-        //var token = _atmService.CreateToken();
-
-        if (!_atmService.Authorize(token, model.password))
-        {
-            return Unauthorized(new { cardNumber });
-        }
-
-        // - return token
         return Ok(new { token });
     }
 
     [HttpPost("cards/{cardNumber}/withdraw")]
     public ActionResult Withdraw([FromHeader(Name = "X-Token")] Guid token, string cardNumber, [FromBody] AtmWithdraw model)
     {
-        // - find verified card in ATM by token
-        // - store pending withdraw in ATM
-        //_atmService.ValidToken(token);
-
         _atmService.Withdraw(token, model.Amount);
 
         return Ok(new

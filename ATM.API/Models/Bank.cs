@@ -1,9 +1,9 @@
-﻿using ATM.API.Services;
-using System.Text.RegularExpressions;
+﻿using ATM.API.Models.Interfaces;
+using ATM.API.Services;
 
 namespace ATM.API.Models;
 
-public sealed class Bank : IBankService
+public sealed class Bank : IBank
 {
     private static readonly ICollection<Card> Cards = new HashSet<Card>
     {
@@ -59,13 +59,5 @@ public sealed class Bank : IBankService
         card.Withdraw(amount);
     }
 
-    public void VerifyCardPassword(string cardNumber, string password)
-    {
-        var card = GetCard(cardNumber);
-
-        if (!card.VerifyPassword(password))
-        {
-            throw new ArgumentException("Not valid passowrd");
-        }
-    }
+    
 }

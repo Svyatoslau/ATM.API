@@ -26,10 +26,15 @@ public class ExceptionHandlingMiddleware : ExceptionMiddlewareBase
             await context.Response
                 .WriteJson(InternalServerError(new ExceptionResult(ex.Message)));
         }
-        catch (ArgumentException ex)
+        catch (UnauthorizedAccessException ex)
         {
             await context.Response
-                .WriteJson(BadRequest(new ExceptionResult(ex.Message)));
+                .WriteJson(Unauthorized(new ExceptionResult(ex.Message)));
+        }
+        catch (TimeoutException ex)
+        {
+            await context.Response
+                .WriteJson(TimeOver(new ExceptionResult(ex.Message)));
         }
     }
 }

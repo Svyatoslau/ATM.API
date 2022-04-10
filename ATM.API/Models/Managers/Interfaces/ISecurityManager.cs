@@ -1,4 +1,4 @@
-﻿namespace ATM.API.Services;
+﻿namespace ATM.API.Models.Managers.Interfaces;
 
 public interface ISecurityManager
 {

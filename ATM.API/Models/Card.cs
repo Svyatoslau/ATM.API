@@ -1,14 +1,12 @@
-﻿using ATM.API.Services;
+﻿namespace ATM.API.Models;
 
-namespace ATM.API.Models;
-
-public sealed class Card 
+public sealed class Card
 {
     public string Number { get; }
     public string Holder { get; }
     public CardBrand Brand { get; }
     public int Balance { get; private set; }
-    
+
     private string Password { get; }
 
     public Card(string number, string holder, CardBrand brand, int balance, string password) =>
@@ -18,5 +16,3 @@ public sealed class Card
 
     public bool VerifyPassword(string password) => Password.Equals(password, StringComparison.InvariantCulture);
 }
-
-    

@@ -1,28 +1,18 @@
-﻿using ATM.API.Services;
+﻿using ATM.API.Models.Interfaces;
+using ATM.API.Models.Managers;
 
 namespace ATM.API.Models;
 
-public interface ISessional
+public sealed class Atm : IAtm
 {
-    Guid StartSession(string cardNumber);
-    void FinishSession(Guid token);
-}
-
-public sealed class Atm : IAtmService
-{
-    private readonly IBankService _bankService;
-    private readonly ICardService _cardService;
-    private readonly ISecurityManager _securityManager;
-
+    private readonly IBank _bankService;
     private readonly CardSessionManager _cardSessionManager;
     
     private int TotalAmount { get; set; } = 1000;
     public int GetTotalAmount() { return TotalAmount; }
 
-    private Guid Token { get; set; }
-    private string CardNumber { get; set; }
-    public Atm(IBankService bankService, ICardService cardService, ISecurityManager securityManager)
-        => (_bankService, _cardService, _securityManager) = (bankService, cardService, securityManager);
+    public Atm(IBank bankService, CardSessionManager cardSessionManager)
+        => (_bankService, _cardSessionManager) = (bankService, cardSessionManager);
 
     public void Withdraw(Guid token, int amount)
     {
@@ -55,94 +45,6 @@ public sealed class Atm : IAtmService
         _bankService.Withdraw(cardNumber, amount);
 
         TotalAmount -= amount;
-
-        _cardSessionManager.FinishSession(token);
     }
-
-    public void SaveCard(string cardNumber)
-    {
-        // I repeat this code in the Bank
-        // Can I transfer it to the CardService?
-        if (!_cardService.IsValidCardNumber(cardNumber))
-        {
-            throw new ArgumentOutOfRangeException(nameof(cardNumber), "Invalid card number.");
-        }
-
-        CardNumber = cardNumber;
-        CleanToken();
-    }
-
-    public void ValidCard(string cardNumber, string password)
-    {
-        CardExist(cardNumber);
-        VerifyPassword(password);
-    }
-
-    public void CardExist(string cardNumber)
-    {
-        if (!cardNumber.Equals(CardNumber))
-        {
-            throw new ArgumentException("Isn't valid card number", nameof(cardNumber));
-        }
-    }
-
-    public void VerifyPassword(string password) 
-        => _bankService.VerifyCardPassword(CardNumber, password);
-
-    public Guid CreateToken()
-    {
-        Token = _securityManager.CreateToken();
-        return Token;
-    }
-
-    public void ValidToken(string token)
-    {
-        if (Token == Guid.Empty)
-        {
-            throw new InvalidOperationException("Empty token.");
-        }
-
-        if (!token.Equals(Token.ToString()))
-        {
-            throw new ArgumentException("Unvalid token.");
-        }
-    }
-
-    public void CleanToken() => Token = Guid.Empty;
-    
-    // New Methods
-    public Guid StartSession(string cardNumber)
-    {
-        if (!_cardService.IsValidCardNumber(cardNumber))
-        {
-            throw new ArgumentException("Invalid card number.", nameof(cardNumber));
-        }
-        
-        return _cardSessionManager.StartSession(cardNumber);
-    }
-    
-    public bool Authorize(Guid token, string cardPassword)
-    {
-        if (!_cardSessionManager.IsSessionValid(token))
-        {
-            return false;
-        }
-        
-        var cardNumber = _cardSessionManager.GetCardNumber(token);
-
-        var card = _bankService.GetCard(cardNumber);
-
-        if (!card.VerifyPassword(cardPassword))
-        {
-            return false;
-        }
-        
-        _cardSessionManager.AuthorizeSession(token);
-
-        return true;
-    }
-    
-    public void FinishSession(Guid token) => _cardSessionManager.FinishSession(token);
-    //
 }
 
