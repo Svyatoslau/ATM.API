@@ -16,6 +16,9 @@ public sealed class Atm : IAtm
 
     public void Withdraw(Guid token, int amount)
     {
+        //Don't work with SessionManager in two logically different services
+        // - AtmController
+        // - Atm
         if (!_cardSessionManager.IsSessionAuthorized(token))
         {
             throw new UnauthorizedAccessException();

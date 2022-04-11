@@ -12,38 +12,34 @@ public sealed class CardSessionManager : ISessional
 
     public CardSessionManager(ISecurityManager securityManager, ICardSecurity cardSecurity)
         => (_securityManager, _cardSecurity) = (securityManager, cardSecurity);
-
-    private int SessionTime { get;} = 60;
+    
+    private const double SessionExpirationTimeInMinutes = 1;
 
     public Guid StartSession(string cardNumber)
     {
         var token = _securityManager.CreateToken();
 
-        _sessions.Add(new(cardNumber, token, DateTime.Now));
+        _sessions.Add(new(cardNumber, token));
 
         return token;
     }
-
-    public void CheckSessionTime(Guid token)
-    {
-        var oldTime = GetCreationTime(token);
-        var newTime = DateTime.Now;
-        var diffrence = newTime - oldTime;
-
-        if(diffrence.TotalSeconds > SessionTime)
-        {
-            FinishSession(token);
-            throw new TimeoutException("Session time over.");
-        }
-    }
-    public bool IsSessionValid(Guid token) => _sessions.Any(x => x.Token == token);
-
+    
+    private static bool IsSessionExpired(DateTime createdAt)
+        => DateTime.UtcNow.AddMinutes(-SessionExpirationTimeInMinutes) > createdAt;
+    
     public void AuthorizeSession(Guid token, string password)
     {
-        CheckSessionTime(token);
-
         var session = _sessions.Single(x => x.Token == token);
 
+        if (IsSessionExpired(session.CreatedAt))
+        {
+            FinishSession(session.Token);
+            
+            throw new TimeoutException("Session has been expired");
+        }
+
+        //Are you sure that CardSessionManager should be responsible for
+        //password checking?
         _cardSecurity.VerifyCardPassword(GetCardNumber(token), password);
 
         _sessions.Remove(session);
@@ -53,10 +49,6 @@ public sealed class CardSessionManager : ISessional
 
     public bool IsSessionAuthorized(Guid token) => _sessions.Any(x => x.Token == token && x.IsAuthorized);
 
-    public DateTime GetCreationTime(Guid token) => _sessions
-        .Where(x => x.Token == token)
-        .Select(x => x.CreationTime)
-        .Single();
     public string GetCardNumber(Guid token) => _sessions
         .Where(x => x.Token == token)
         .Select(static x => x.CardNumber)
