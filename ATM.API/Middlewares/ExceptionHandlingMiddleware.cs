@@ -1,6 +1,6 @@
 ﻿namespace ATM.API.Middlewares;
 
-public class ExceptionHandlingMiddleware : ExceptionMiddlewareBase
+public sealed class ExceptionHandlingMiddleware : ExceptionMiddlewareBase
 {
     private readonly RequestDelegate _next;
     public ExceptionHandlingMiddleware(RequestDelegate next) => _next = next;

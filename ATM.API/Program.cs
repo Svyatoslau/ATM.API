@@ -1,4 +1,4 @@
-using ATM.API.Middlewares;
+using ATM.API.Middlewares.Extensions;
 using ATM.API.Models;
 using ATM.API.Models.Interfaces;
 using ATM.API.Models.Managers;
@@ -40,7 +40,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseExceptionHandling();
+
+app.UseTimeSessionHandling();
 
 app.UseRouting();
 

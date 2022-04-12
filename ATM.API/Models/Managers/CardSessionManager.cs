@@ -2,18 +2,14 @@
 
 namespace ATM.API.Models.Managers;
 
-public sealed class CardSessionManager : ISessional
+public sealed class CardSessionManager : ISessional, ISessionNotWrite
 {
     private readonly ISecurityManager _securityManager;
 
-    private readonly ICardSecurity _cardSecurity;
-
     private readonly ICollection<CardSessionModel> _sessions = new List<CardSessionModel>();
 
-    public CardSessionManager(ISecurityManager securityManager, ICardSecurity cardSecurity)
-        => (_securityManager, _cardSecurity) = (securityManager, cardSecurity);
-    
-    private const double SessionExpirationTimeInMinutes = 1;
+    public CardSessionManager(ISecurityManager securityManager)
+        => _securityManager = securityManager;
 
     public Guid StartSession(string cardNumber)
     {
@@ -24,23 +20,9 @@ public sealed class CardSessionManager : ISessional
         return token;
     }
     
-    private static bool IsSessionExpired(DateTime createdAt)
-        => DateTime.UtcNow.AddMinutes(-SessionExpirationTimeInMinutes) > createdAt;
-    
     public void AuthorizeSession(Guid token, string password)
     {
-        var session = _sessions.Single(x => x.Token == token);
-
-        if (IsSessionExpired(session.CreatedAt))
-        {
-            FinishSession(session.Token);
-            
-            throw new TimeoutException("Session has been expired");
-        }
-
-        //Are you sure that CardSessionManager should be responsible for
-        //password checking?
-        _cardSecurity.VerifyCardPassword(GetCardNumber(token), password);
+        var session = GetSession(token);
 
         _sessions.Remove(session);
 
@@ -60,5 +42,8 @@ public sealed class CardSessionManager : ISessional
 
         _sessions.Remove(session);
     }
+
+    public CardSessionModel GetSession(Guid token) => _sessions.Single(x => x.Token == token);
+
 }
 
