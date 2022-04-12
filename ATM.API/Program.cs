@@ -13,9 +13,14 @@ builder
     .AddSingleton<IBank, Bank>()
     .AddSingleton<ICardSecurity, CardSecurityManager>()
     .AddSingleton<ISecurityManager, SecurityManager>()
-    .AddSingleton<CardSessionManager>()
     .AddSingleton<IAtm, Atm>()
     .AddSingleton<ICardService, CardService>();
+
+builder
+    .Services
+    .AddSingleton<SessionStorage>()
+    .AddSingleton<SessionManager>()
+    .AddSingleton<SessionProvider>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

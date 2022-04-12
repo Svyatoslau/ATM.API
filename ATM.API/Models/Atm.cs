@@ -6,20 +6,20 @@ namespace ATM.API.Models;
 public sealed class Atm : IAtm
 {
     private readonly IBank _bankService;
-    private readonly CardSessionManager _cardSessionManager;
+    private readonly SessionManager _cardSessionManager;
     
     private int TotalAmount { get; set; } = 1000;
     public int GetTotalAmount() { return TotalAmount; }
 
-    public Atm(IBank bankService, CardSessionManager cardSessionManager)
+    public Atm(IBank bankService, SessionManager cardSessionManager)
         => (_bankService, _cardSessionManager) = (bankService, cardSessionManager);
 
     public void Withdraw(Guid token, int amount)
     {
-        //Don't work with SessionManager in two logically different services
+        // Don't work with SessionManager in two logically different services
         // - AtmController
         // - Atm
-        if (!_cardSessionManager.IsSessionAuthorized(token))
+        if (!_cardSessionManager.IsAuthorized(token))
         {
             throw new UnauthorizedAccessException();
         }
@@ -48,6 +48,8 @@ public sealed class Atm : IAtm
         _bankService.Withdraw(cardNumber, amount);
 
         TotalAmount -= amount;
+        
+        _cardSessionManager.FinishSession(token);
     }
 }
 

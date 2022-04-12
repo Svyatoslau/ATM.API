@@ -1,39 +1,34 @@
-﻿using ATM.API.Models.Managers.Interfaces;
-using ATM.API.Models.Managers;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
+﻿using ATM.API.Models.Managers;
+using ATM.API.Middlewares.Extensions;
 
 namespace ATM.API.Middlewares;
-// You may need to install the Microsoft.AspNetCore.Http.Abstractions package into your project
+
 public sealed class TimeSessionHandlingMiddleware : TimeSessionBase
 {
     private readonly RequestDelegate _next;
 
-    private readonly ISessionNotWrite _sessions;
+    private readonly SessionProvider _sessionProvider;
 
-    public TimeSessionHandlingMiddleware(RequestDelegate next, CardSessionManager cardSessionManger) 
-        => (_next, _sessions) = (next, cardSessionManger);
-
-
+    public TimeSessionHandlingMiddleware(RequestDelegate next, SessionProvider sessionProvider) 
+        => (_next, _sessionProvider) = (next, sessionProvider);
+    
+    // Here you just read a session and don't modify it
     public Task Invoke(HttpContext httpContext)
     {
-        var headres = httpContext.Request.Headers;
+        var header = httpContext.GetRequestHeader(HeaderNameToken);
 
-        if (headres.Keys.Contains(HeaderNameToken))
+        if (!Guid.TryParse(header, out var token))
         {
-            var session = _sessions.GetSession(Guid.Parse(headres[HeaderNameToken]));
-            if (IsSessionExpired(session.CreatedAt))
-            {
-                _sessions.FinishSession(session.Token);
+            return _next(httpContext);
+        }
+        
+        var session = _sessionProvider.Find(token);
 
-                throw new TimeoutException("Session has been expired.");
-            }
-
+        if (!IsSessionExpired(session.CreatedAt))
+        {
             return _next(httpContext);
         }
 
-        return _next(httpContext);
-
+        throw new TimeoutException("Session has been expired");
     }
 }

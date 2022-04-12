@@ -2,6 +2,6 @@
 
 public sealed record CardSessionModel(string CardNumber, Guid Token)
 {
-    public bool IsAuthorized { get; init; } = false;
-    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+    public bool IsAuthorized { get; init; }
+    public DateTime CreatedAt { get; } = DateTime.UtcNow;
 }

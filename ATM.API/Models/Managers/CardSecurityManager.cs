@@ -15,7 +15,7 @@ public class CardSecurityManager : ICardSecurity
 
         if (!card.VerifyPassword(password))
         {
-            throw new UnauthorizedAccessException("Not valid passoword.");
+            throw new UnauthorizedAccessException("Not valid password");
         }
     }
 }

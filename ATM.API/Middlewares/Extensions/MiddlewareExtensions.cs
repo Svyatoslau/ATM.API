@@ -19,4 +19,9 @@ public static class MiddlewareExtensions
     public static IApplicationBuilder UseExceptionHandling(this IApplicationBuilder builder)
         => builder.UseMiddleware<ExceptionHandlingMiddleware>();
     
+    public static string GetRequestHeader(this HttpContext ctx, string header)
+        => ctx.Request.Headers.TryGetValue(header, out var headers)
+            ? headers[0]
+            : string.Empty;
+    
 }

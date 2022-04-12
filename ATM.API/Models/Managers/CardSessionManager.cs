@@ -2,48 +2,66 @@
 
 namespace ATM.API.Models.Managers;
 
-public sealed class CardSessionManager : ISessional, ISessionNotWrite
+// This may also be implementation of Repository pattern
+public sealed class SessionStorage
 {
+    private readonly ICollection<CardSessionModel> _sessions = new List<CardSessionModel>();
+    
+    public CardSessionModel Find(Guid token) => _sessions.Single(x => x.Token == token);
+
+    public void Add(CardSessionModel session) => _sessions.Add(session);
+
+    public void Remove(CardSessionModel session) => _sessions.Remove(session);
+}
+
+// With use of such provider you can make you session readonly
+// Also you decouple your middleware logic from application logic
+public sealed class SessionProvider
+{
+    private readonly SessionStorage _storage;
+
+    public SessionProvider(SessionStorage storage) => _storage = storage;
+
+    public CardSessionModel Find(Guid token) => _storage.Find(token);
+}
+
+// This class is for your application logic
+public sealed class SessionManager
+{
+    private readonly SessionStorage _sessionStorage;
+    
     private readonly ISecurityManager _securityManager;
 
-    private readonly ICollection<CardSessionModel> _sessions = new List<CardSessionModel>();
+    public SessionManager(SessionStorage sessionStorage, ISecurityManager securityManager)
+        => (_sessionStorage, _securityManager) = (sessionStorage, securityManager);
 
-    public CardSessionManager(ISecurityManager securityManager)
-        => _securityManager = securityManager;
-
-    public Guid StartSession(string cardNumber)
+    public Guid Start(string cardNumber)
     {
         var token = _securityManager.CreateToken();
 
-        _sessions.Add(new(cardNumber, token));
+        _sessionStorage.Add(new(cardNumber, token));
 
         return token;
     }
     
-    public void AuthorizeSession(Guid token, string password)
+    public void Authorize(Guid token)
     {
-        var session = GetSession(token);
+        var session = _sessionStorage.Find(token);
 
-        _sessions.Remove(session);
+        _sessionStorage.Remove(session);
 
-        _sessions.Add(session with { IsAuthorized = true });
+        _sessionStorage.Add(session with { IsAuthorized = true });
     }
-
-    public bool IsSessionAuthorized(Guid token) => _sessions.Any(x => x.Token == token && x.IsAuthorized);
-
-    public string GetCardNumber(Guid token) => _sessions
-        .Where(x => x.Token == token)
-        .Select(static x => x.CardNumber)
-        .Single();
-
+    
+    public bool IsAuthorized(Guid token) => _sessionStorage.Find(token).IsAuthorized;
+    
     public void FinishSession(Guid token)
     {
-        var session = _sessions.Single(x => x.Token == token);
+        var session = _sessionStorage.Find(token);
 
-        _sessions.Remove(session);
+        _sessionStorage.Remove(session);
     }
 
-    public CardSessionModel GetSession(Guid token) => _sessions.Single(x => x.Token == token);
-
+    public string GetCardNumber(Guid token) => _sessionStorage.Find(token).CardNumber;
 }
 
