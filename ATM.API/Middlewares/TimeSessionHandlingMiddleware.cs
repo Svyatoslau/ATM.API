@@ -1,5 +1,4 @@
-﻿using ATM.API.Models.Managers;
-using ATM.API.Middlewares.Extensions;
+﻿using ATM.API.Services.Sessions;
 
 namespace ATM.API.Middlewares;
 
@@ -12,7 +11,6 @@ public sealed class TimeSessionHandlingMiddleware : TimeSessionBase
     public TimeSessionHandlingMiddleware(RequestDelegate next, SessionProvider sessionProvider) 
         => (_next, _sessionProvider) = (next, sessionProvider);
     
-    // Here you just read a session and don't modify it
     public Task Invoke(HttpContext httpContext)
     {
         var header = httpContext.GetRequestHeader(HeaderNameToken);

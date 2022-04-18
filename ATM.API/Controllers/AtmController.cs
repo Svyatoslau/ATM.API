@@ -1,7 +1,5 @@
 ﻿using ATM.API.Models.API;
-using ATM.API.Models.Interfaces;
-using ATM.API.Models.Managers;
-using ATM.API.Models.Managers.Interfaces;
+using ATM.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ATM.API.Controllers;
@@ -10,25 +8,14 @@ namespace ATM.API.Controllers;
 
 public class AtmController : ControllerBase
 {
-    // Controller should have only one service injected
-    // Controller usually serve handling requests and transmitting them to appropriate service
-    // 
-    // You should fix it
-    private readonly IAtm _atmService;
-    private readonly SessionManager _sessionManager;
-    private readonly ICardSecurity _cardSecurity;
+    private readonly IAtmService _atmService;
 
-    public AtmController(IAtm atmService, SessionManager sessionManager, ICardSecurity cardSecurity)
-    {
-        _atmService = atmService;
-        _sessionManager = sessionManager;
-        _cardSecurity = cardSecurity;
-    }
+    public AtmController(IAtmService atmService) => _atmService = atmService;
 
     [HttpGet("cards/{cardNumber}")]
     public ActionResult Init(string cardNumber)
     {
-        var token = _sessionManager.Start(cardNumber);
+        var token = _atmService.StartSession(cardNumber);
 
         return Accepted(new
         {
@@ -38,27 +25,21 @@ public class AtmController : ControllerBase
     }
 
     [HttpPost("cards/{cardNumber}")]
-    public ActionResult Authorize(string cardNumber, [FromBody] AtmForAuthorize model, [FromHeader(Name = "X-Token")] Guid token)
+    public ActionResult Authorize([FromBody] AtmForAuthorize model, [FromHeader(Name = "X-Token")] Guid token)
     {
-        // We created token to use it
-        // In your case I can change card number but use token from Init() method
-        _cardSecurity.VerifyCardPassword(cardNumber, model.password);
-
-        _sessionManager.Authorize(token);
+        _atmService.AuthorizeSession(token, model.Password);
 
         return Ok();
     }
 
     [HttpPut("cards/{cardNumber}")]
-    public ActionResult Withdraw([FromHeader(Name = "X-Token")] Guid token, string cardNumber, [FromBody] AtmWithdraw model)
+    public ActionResult Withdraw([FromHeader(Name = "X-Token")] Guid token, [FromBody] AtmWithdraw model)
     {
-        _atmService.Withdraw(token, model.Amount);
+        _atmService.WithdrawMoney(token, model.Amount);
 
         return Ok(new
         {
             Message = $"You successfully withdraw {model.Amount}"
         });
     }
-
-
 }

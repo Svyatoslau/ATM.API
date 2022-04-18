@@ -1,4 +1,5 @@
-﻿namespace ATM.API.Models.Managers.Interfaces;
+﻿namespace ATM.API.Services.Interfaces;
+
 
 public interface ISessional
 {

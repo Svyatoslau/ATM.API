@@ -1,26 +1,36 @@
-using ATM.API.Middlewares.Extensions;
 using ATM.API.Models;
 using ATM.API.Models.Interfaces;
-using ATM.API.Models.Managers;
-using ATM.API.Models.Managers.Interfaces;
+using ATM.API.Repositories;
 using ATM.API.Services;
+using ATM.API.Services.Card;
+using ATM.API.Services.Interfaces;
+using ATM.API.Services.Sessions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder
     .Services
-    .AddSingleton<IBank, Bank>()
-    .AddSingleton<ICardSecurity, CardSecurityManager>()
-    .AddSingleton<ISecurityManager, SecurityManager>()
     .AddSingleton<IAtm, Atm>()
-    .AddSingleton<ICardService, CardService>();
+    .AddSingleton<IAtmService, AtmService>();
+
+builder
+    .Services
+    .AddSingleton<IBank, Bank>();
+
+builder
+    .Services
+    .AddSingleton<ICardService, CardService>()
+    .AddSingleton<ICardSecurity, CardSecurityManager>()
+    .AddSingleton<CardStorage>();
 
 builder
     .Services
     .AddSingleton<SessionStorage>()
     .AddSingleton<SessionManager>()
-    .AddSingleton<SessionProvider>();
+    .AddSingleton<SessionProvider>()
+    .AddSingleton<ISecurityManager, SecurityManager>();
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

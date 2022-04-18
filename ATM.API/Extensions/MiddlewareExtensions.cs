@@ -1,4 +1,6 @@
-﻿namespace ATM.API.Middlewares.Extensions;
+﻿using ATM.API.Middlewares;
+
+namespace Microsoft.AspNetCore.Http;
 
 public static class MiddlewareExtensions
 {
@@ -18,10 +20,4 @@ public static class MiddlewareExtensions
     /// <returns></returns>
     public static IApplicationBuilder UseExceptionHandling(this IApplicationBuilder builder)
         => builder.UseMiddleware<ExceptionHandlingMiddleware>();
-    
-    public static string GetRequestHeader(this HttpContext ctx, string header)
-        => ctx.Request.Headers.TryGetValue(header, out var headers)
-            ? headers[0]
-            : string.Empty;
-    
 }

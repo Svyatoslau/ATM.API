@@ -1,4 +1,5 @@
-﻿namespace ATM.API.Services;
+﻿namespace ATM.API.Services.Interfaces;
+
 
 public interface ICardService
 {

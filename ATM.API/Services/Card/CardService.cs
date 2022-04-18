@@ -1,6 +1,7 @@
-﻿using System.Text.RegularExpressions;
+﻿using ATM.API.Services.Interfaces;
+using System.Text.RegularExpressions;
 
-namespace ATM.API.Services;
+namespace ATM.API.Services.Card;
 
 public class CardService : ICardService
 {

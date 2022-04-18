@@ -1,22 +1,17 @@
 ﻿using ATM.API.Models.Interfaces;
-using ATM.API.Services;
+using ATM.API.Repositories;
+using ATM.API.Services.Interfaces;
 
 namespace ATM.API.Models;
 
 public sealed class Bank : IBank
 {
-    private static readonly ICollection<Card> Cards = new HashSet<Card>
-    {
-        new ("4444333322221111", "Troy Mcfarland", CardBrand.Visa, 800, "edyDfd5A"),
-        new ("5200000000001005", "Levi Downs", CardBrand.MasterCard, 400, "teEAxnqg")
-    };
-
     private readonly ICardService _cardService;
+    private readonly CardStorage _cardStorage;
     private int cardWithdrawLimit { get; set; }
 
-    public Bank(ICardService cardService) => _cardService = cardService;
-
-    public Card GetCard(string cardNumber) => Cards.Single(x => x.Number.Equals(cardNumber));
+    public Bank(ICardService cardService, CardStorage cardStorage)
+        => (_cardService, _cardStorage) = (cardService, cardStorage);
 
     private static int GetCardWithdrawLimit(CardBrand cardBrand) => cardBrand switch
     {
@@ -32,7 +27,7 @@ public sealed class Bank : IBank
             throw new ArgumentOutOfRangeException(nameof(cardNumber), "Invalid card number.");
         }
 
-        var card = GetCard(cardNumber);
+        var card = _cardStorage.Find(cardNumber);
 
         if (card.Balance <= 0)
         {
