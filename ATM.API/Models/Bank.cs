@@ -6,12 +6,10 @@ namespace ATM.API.Models;
 
 public sealed class Bank : IBank
 {
-    private readonly ICardService _cardService;
     private readonly CardStorage _cardStorage;
     private int cardWithdrawLimit { get; set; }
 
-    public Bank(ICardService cardService, CardStorage cardStorage)
-        => (_cardService, _cardStorage) = (cardService, cardStorage);
+    public Bank(CardStorage cardStorage) => _cardStorage = cardStorage;
 
     private static int GetCardWithdrawLimit(CardBrand cardBrand) => cardBrand switch
     {
@@ -22,11 +20,6 @@ public sealed class Bank : IBank
 
     public void Withdraw(string cardNumber, int amount)
     {
-        if (!_cardService.IsValidCardNumber(cardNumber))
-        {
-            throw new ArgumentOutOfRangeException(nameof(cardNumber), "Invalid card number.");
-        }
-
         var card = _cardStorage.Find(cardNumber);
 
         if (card.Balance <= 0)
@@ -54,5 +47,7 @@ public sealed class Bank : IBank
         card.Withdraw(amount);
     }
 
-    
+    public bool CardExist(string cardNumber) => _cardStorage.CardExist(cardNumber);
+
+    public int GetCardBalance(string cardNumber) => _cardStorage.Find(cardNumber).Balance;
 }

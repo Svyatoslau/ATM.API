@@ -42,4 +42,16 @@ public class AtmController : ControllerBase
             Message = $"You successfully withdraw {model.Amount}"
         });
     }
+
+    [HttpGet("cards/{cardNumber}/balance")]
+    public ActionResult GetCardBalance([FromHeader(Name = "X-Token")] Guid token)
+    {
+        var cardBalance = _atmService.GetCardBalance(token);
+
+        return Ok(new
+        {
+            Message = "Current card balance:",
+            CardBalance = cardBalance
+        });
+    }
 }

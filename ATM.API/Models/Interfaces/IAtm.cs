@@ -2,5 +2,7 @@
 
 public interface IAtm
 {
-    void Withdraw(string cardNumber, int amount);
+    public void Withdraw(int amount);
+    public bool IsBalancePositive();
+    public int GetTotalAmount();
 }

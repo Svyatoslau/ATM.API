@@ -14,4 +14,6 @@ public class CardStorage : IRepository<Card, string>
     public Card Find(string cardNumber) => Cards.Single(x => x.Number.Equals(cardNumber));
 
     public void Remove(Card card) => Cards.Remove(card);
+
+    public bool CardExist(string cardNumber) => Cards.Any(card => card.Number.Equals(cardNumber));
 }
