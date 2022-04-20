@@ -5,7 +5,7 @@ namespace Microsoft.AspNetCore.Http;
 public static class MiddlewareExtensions
 {
     /// <summary>
-    /// Middleware for handling time session
+    /// Handling time session
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
@@ -14,10 +14,18 @@ public static class MiddlewareExtensions
     
 
     /// <summary>
-    /// Middleware for handling exception
+    /// Handling exception
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
     public static IApplicationBuilder UseExceptionHandling(this IApplicationBuilder builder)
         => builder.UseMiddleware<ExceptionHandlingMiddleware>();
+
+    /// <summary>
+    /// Handling errors in request after authorization
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
+    public static IApplicationBuilder UseVerifyAuthorizeHandling(this IApplicationBuilder builder)
+        => builder.UseMiddleware<VerifyAuthorizeHandlingMiddleware>();
 }

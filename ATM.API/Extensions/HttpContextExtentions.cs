@@ -12,4 +12,14 @@ public static class HttpContextExtentions
     => context.Request.Headers.TryGetValue(header, out var headers)
         ? headers[0]
         : string.Empty;
+
+    /// <summary>
+    /// Verify card number
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="cardNumber"></param>
+    /// <returns></returns>
+    public static bool HasCard(this HttpContext context, string cardNumber)
+        => context.Request.Path.Value.Split('/').Contains(cardNumber);
+
 }

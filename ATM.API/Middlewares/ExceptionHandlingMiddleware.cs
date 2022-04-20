@@ -36,6 +36,11 @@ public sealed class ExceptionHandlingMiddleware : ExceptionMiddlewareBase
             await context.Response
                 .WriteJson(TimeOver(new ExceptionResult(ex.Message)));
         }
+        catch (BadHttpRequestException ex)
+        {
+            await context.Response
+                .WriteJson(BadRequest(new ExceptionResult(ex.Message)));
+        }
     }
 }
 

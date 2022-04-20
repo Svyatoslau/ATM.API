@@ -37,11 +37,27 @@ public class AtmController : ControllerBase
     {
         _atmService.WithdrawMoney(token, model.Amount);
 
+        if (_atmService.IsIncludeReceipt(token))
+        {
+            var receipt = _atmService.GetWithdrawReceipt(token, model.Amount);
+
+            return Ok(receipt);
+        }
+
         return Ok(new
         {
             Message = $"You successfully withdraw {model.Amount}"
         });
     }
+
+    [HttpPut("cards/{cardNumber}/receipt")]
+    public ActionResult Receipt([FromHeader(Name = "X-Token")] Guid token, [FromBody] AtmForReceipt model)
+    {
+        _atmService.Receipt(token, model.IncludeReceipt);
+
+        return Ok();
+    }
+
 
     [HttpGet("cards/{cardNumber}/balance")]
     public ActionResult GetCardBalance([FromHeader(Name = "X-Token")] Guid token)
