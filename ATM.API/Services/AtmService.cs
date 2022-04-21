@@ -15,6 +15,7 @@ public class AtmService : IAtmService
     private readonly ICardService _cardService;
     private readonly ReceiptService _receiptService;
 
+    //It looks like you have here a lot of dependencies
     public AtmService(IAtm atm, IBank bank, ICardSecurity cardSecurity, SessionManager sessionManager, ICardService cardService, ReceiptService receiptService)
         => (_atm, _bank, _cardSecurity, _sessionManager, _cardService, _receiptService)
         = (atm, bank, cardSecurity, sessionManager, cardService, receiptService);
@@ -88,7 +89,9 @@ public class AtmService : IAtmService
 
         // Do I need to Finish session, after check balance?
         // Or user can continue?
-
+        //---
+        // You should use the same session
+        // like in a real Atm
         return _bank.GetCardBalance(cardNumber);
     }
 

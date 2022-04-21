@@ -9,6 +9,8 @@ public sealed class ReceiptService
 
     public ReceiptService(SessionStorage sessionStorage) => _sessionStorage = sessionStorage;
 
+    // To reduce this weird logic 
+    // Use bool at the beginning
     public bool ParseAnswerToBool(string answer) => answer.ToLower() switch
     {
         "yes" => true,
@@ -17,8 +19,10 @@ public sealed class ReceiptService
             $"Invalid parameter.Available parameters are: \"yes\", \"no\""),
     };
 
+    // It is better to take cardNumber.Length and 4 last digits
+    // Then make others *
     public Receipt WithdrawReceipt(string cardNumber, int amount)
-        => new Receipt($"**** **** **** {cardNumber.Substring(12)}", amount);
+        => new Receipt($"**** **** **** {cardNumber[12..]}", amount);
 
     public void Receipt(Guid token, string answer)
     {

@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace ATM.API.Controllers;
 
 [ApiController, ApiVersion("1.0"), Route("api/v1/atm")]
-
 public class AtmController : ControllerBase
 {
     private readonly IAtmService _atmService;
@@ -50,7 +49,7 @@ public class AtmController : ControllerBase
         });
     }
 
-    [HttpPut("cards/{cardNumber}/receipt")]
+    [HttpPatch("cards/{cardNumber}")]
     public ActionResult Receipt([FromHeader(Name = "X-Token")] Guid token, [FromBody] AtmForReceipt model)
     {
         _atmService.Receipt(token, model.IncludeReceipt);

@@ -8,7 +8,7 @@ public interface IAtmService : ISessional
 {
     public void WithdrawMoney(Guid token, int amount);
     public int GetCardBalance(Guid token);
-    public void Receipt(Guid token, string answer);
+    public void Receipt(Guid token, bool includeReceipt);
     public bool IsIncludeReceipt(Guid token);
     public Receipt GetWithdrawReceipt(Guid token, int amount);
 }
