@@ -1,9 +1,10 @@
 ﻿using ATM.API.Repositories;
+using ATM.API.Security;
 using ATM.API.Services.Interfaces;
 
 namespace ATM.API.Services.Sessions;
 
-public sealed class SessionManager
+public sealed class SessionManager : ISessional
 {
     private readonly SessionStorage _sessionStorage;
 
@@ -32,12 +33,21 @@ public sealed class SessionManager
 
     public bool IsAuthorized(Guid token) => _sessionStorage.Find(token).IsAuthorized;
 
-    public void FinishSession(Guid token)
+    public void Finish(Guid token)
     {
         var session = _sessionStorage.Find(token);
 
         _sessionStorage.Remove(session);
     }
+    public void Receipt(Guid token, bool answer)
+    {
 
+        var session = _sessionStorage.Find(token);
+
+        _sessionStorage.Remove(session);
+
+        _sessionStorage.Add(session with { Receipt = answer });
+    }
+    public bool IsIncludeReceipt(Guid token) => _sessionStorage.Find(token).Receipt;
     public string GetCardNumber(Guid token) => _sessionStorage.Find(token).CardNumber;
 }

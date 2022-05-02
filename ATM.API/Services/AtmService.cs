@@ -3,6 +3,7 @@ using ATM.API.Models.API;
 using ATM.API.Models.Interfaces;
 using ATM.API.Services.Interfaces;
 using ATM.API.Services.Sessions;
+using System.Text.RegularExpressions;
 
 namespace ATM.API.Services;
 
@@ -10,32 +11,27 @@ public class AtmService : IAtmService
 {
     private readonly IAtm _atm;
     private readonly IBank _bank;
-    private readonly ICardSecurity _cardSecurity;
     private readonly SessionManager _sessionManager;
-    private readonly ICardService _cardService;
-    private readonly ReceiptService _receiptService;
 
     //It looks like you have here a lot of dependencies
-    public AtmService(IAtm atm, IBank bank, ICardSecurity cardSecurity, SessionManager sessionManager, ICardService cardService, ReceiptService receiptService)
-        => (_atm, _bank, _cardSecurity, _sessionManager, _cardService, _receiptService)
-        = (atm, bank, cardSecurity, sessionManager, cardService, receiptService);
+    public AtmService(IAtm atm, IBank bank, SessionManager sessionManager)
+        => (_atm, _bank, _sessionManager) = (atm, bank, sessionManager);
     public void AuthorizeSession(Guid token, string password)
     {
         var cardNumber = _sessionManager.GetCardNumber(token);
-        _cardSecurity.VerifyCardPassword(cardNumber, password);
+        _bank.VerifyCardPassword(cardNumber, password);
 
         _sessionManager.Authorize(token);
     }
 
     public void FinishSession(Guid token)
     {
-        AuthorizedSession(token);
-
-        _sessionManager.FinishSession(token);
+        _sessionManager.Finish(token);
     }
     public Guid StartSession(string cardNumber)
     {
-        if (!_cardService.IsValidCardNumber(cardNumber))
+        ;
+        if (!Regex.IsMatch(cardNumber, @"\d{16}"))
         {
             throw new ArgumentOutOfRangeException(nameof(cardNumber), "Invalid card number.");
         }
@@ -50,7 +46,6 @@ public class AtmService : IAtmService
 
     public void WithdrawMoney(Guid token, int amount)
     {
-        AuthorizedSession(token);
 
         if (amount <= 0)
         {
@@ -74,57 +69,29 @@ public class AtmService : IAtmService
 
         _bank.Withdraw(cardNumber, amount);
         _atm.Withdraw(amount);
-
-        //_sessionManager.FinishSession(token);
     }
 
     public int GetCardBalance(Guid token)
     {
-        AuthorizedSession(token);
-
         var cardNumber = _sessionManager.GetCardNumber(token);
 
-
-        //_sessionManager.FinishSession(token);
-
-        // Do I need to Finish session, after check balance?
-        // Or user can continue?
-        //---
-        // You should use the same session
-        // like in a real Atm
         return _bank.GetCardBalance(cardNumber);
     }
 
-    public void Receipt(Guid token, string answer)
+    public void IsIncludeReceipt(Guid token, bool answer)
     {
-        AuthorizedSession(token);
-
-
-        _receiptService.Receipt(token, answer);
-        
+        _sessionManager.Receipt(token, answer); 
     }
 
-    public bool IsIncludeReceipt(Guid token)
+    public Receipt GetReceipt(Guid token, int amount)
     {
-        AuthorizedSession(token);
-
-        return _receiptService.IsInclude(token);
-    }
-
-    public Receipt GetWithdrawReceipt(Guid token, int amount)
-    {
-        AuthorizedSession(token);
+        if (!_sessionManager.IsIncludeReceipt(token))
+        {
+            return null;
+        }
 
         var cardNumber = _sessionManager.GetCardNumber(token);
 
-        return _receiptService.WithdrawReceipt(cardNumber, amount);
-    }
-
-    private void AuthorizedSession(Guid token)
-    {
-        if (!_sessionManager.IsAuthorized(token))
-        {
-            throw new UnauthorizedAccessException("Unauthorized session.");
-        } 
+        return new Receipt($"**** **** **** {cardNumber[12..]}", amount);
     }
 }

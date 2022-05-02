@@ -1,10 +1,12 @@
 using ATM.API.Models;
 using ATM.API.Models.Interfaces;
 using ATM.API.Repositories;
+using ATM.API.Security;
 using ATM.API.Services;
 using ATM.API.Services.Card;
 using ATM.API.Services.Interfaces;
 using ATM.API.Services.Sessions;
+using AuthenticatedWebApi.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +35,11 @@ builder
 
 builder
     .Services
-    .AddSingleton<ReceiptService>();
+    .UseTokenAuthentication();
+
+builder
+    .Services
+    .AddSingleton<ITokenService, TokenService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -61,8 +67,6 @@ app.UseHttpsRedirection();
 app.UseExceptionHandling();
 
 app.UseTimeSessionHandling();
-
-app.UseVerifyAuthorizeHandling();
 
 app.UseRouting();
 

@@ -1,5 +1,7 @@
 ﻿using ATM.API.Models.API;
 using ATM.API.Services.Interfaces;
+using AuthenticatedWebApi.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ATM.API.Controllers;
@@ -31,33 +33,34 @@ public class AtmController : ControllerBase
         return Ok();
     }
 
+    [Authorize(AuthenticationSchemes = TokenAuthenticationSchemeOptions.Name)]
     [HttpPut("cards/{cardNumber}")]
     public ActionResult Withdraw([FromHeader(Name = "X-Token")] Guid token, [FromBody] AtmWithdraw model)
     {
         _atmService.WithdrawMoney(token, model.Amount);
 
-        if (_atmService.IsIncludeReceipt(token))
-        {
-            var receipt = _atmService.GetWithdrawReceipt(token, model.Amount);
+        var receipt = _atmService.GetReceipt(token, model.Amount);
 
-            return Ok(receipt);
+        if (receipt == null)
+        {
+            return Ok(new
+            {
+                Message = $"You successfully withdraw {model.Amount}"
+            });
         }
 
-        return Ok(new
-        {
-            Message = $"You successfully withdraw {model.Amount}"
-        });
+        return Ok(receipt);
     }
-
+    [Authorize(AuthenticationSchemes = TokenAuthenticationSchemeOptions.Name)]
     [HttpPatch("cards/{cardNumber}")]
     public ActionResult Receipt([FromHeader(Name = "X-Token")] Guid token, [FromBody] AtmForReceipt model)
     {
-        _atmService.Receipt(token, model.IncludeReceipt);
+        _atmService.IsIncludeReceipt(token, model.IncludeReceipt);
 
         return Ok();
     }
 
-
+    [Authorize(AuthenticationSchemes = TokenAuthenticationSchemeOptions.Name)]
     [HttpGet("cards/{cardNumber}/balance")]
     public ActionResult GetCardBalance([FromHeader(Name = "X-Token")] Guid token)
     {

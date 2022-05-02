@@ -47,6 +47,16 @@ public sealed class Bank : IBank
         card.Withdraw(amount);
     }
 
+    public void VerifyCardPassword(string cardNumber, string password)
+    {
+        var card = _cardStorage.Find(cardNumber);
+
+        if (!card.VerifyPassword(password))
+        {
+            throw new UnauthorizedAccessException("Invalid password.");
+        }
+    }
+
     public bool CardExist(string cardNumber) => _cardStorage.CardExist(cardNumber);
 
     public int GetCardBalance(string cardNumber) => _cardStorage.Find(cardNumber).Balance;

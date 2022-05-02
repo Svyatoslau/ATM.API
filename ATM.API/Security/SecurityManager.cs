@@ -1,6 +1,4 @@
-﻿using ATM.API.Services.Interfaces;
-
-namespace ATM.API.Services;
+﻿namespace ATM.API.Security;
 
 public sealed class SecurityManager : ISecurityManager 
 {
